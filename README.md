@@ -1,2 +1,2 @@
 # Bridge_truss
-This program draws bridge truss elements in Autocad using Python 
+This program draws bridge truss's elements in Autocad using Python 
