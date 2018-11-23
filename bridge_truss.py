@@ -1,12 +1,4 @@
-import comtypes
-import array
-from pyautocad import Autocad, APoint, types
 from functions import dim_aligned, i_beam
-
-acad = Autocad(create_if_not_exists=True)
-# acad.ActiveDocument.Application.Documents.Open("D:\\IT\\Bridge_truss\\pattern.dwg")
-acad.prompt("Hello, Autocad from Python\n")
-print(acad.doc.Name)
 
 elements = []
 type_elem_1 = elements.append("I-beam")
@@ -34,16 +26,5 @@ elif choice == str(3):
 else:
     print("Goodbye! See you next time!")
     exit()
-# acad = Autocad(create_if_not_exists=True)
-# acad.ActiveDocument.Application.Documents.Open("D:\\IT\\Bridge_truss\\pattern.dwg")
-# acad.prompt("Hello, Autocad from Python\n")
-# print(acad.doc.Name)
-
-
-# p1 = APoint(0, 0)
-# p2 = APoint(50, 25)
-
-# acad.model.AddLine(p1, p2)
-# acad.ActiveDocument.SaveAs('D:\\IT\\Bridge_truss\\1.dwg')
 
 print("Keep working ...")

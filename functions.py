@@ -1,7 +1,9 @@
 from pyautocad import Autocad, APoint, types
 import comtypes
 import array
-acad = Autocad()
+
+acad = Autocad(create_if_not_exists=True)
+acad.ActiveDocument.Application.Documents.Open("D:\\IT\\Bridge_truss\\pattern.dwg")
 acad.prompt("Hello, Autocad from Python\n")
 print(acad.doc.Name)
 
@@ -78,3 +80,5 @@ def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i):
     poly_t_2.move(APoint(0, 0), APoint(0, -5000))
 
     dim_aligned(p1, p2, scale_top, indent_y=-10, move_y=-5000)
+
+# acad.ActiveDocument.SaveAs('D:\\IT\\Bridge_truss\\1.dwg')
