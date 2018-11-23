@@ -1,38 +1,86 @@
 from pyautocad import Autocad, APoint, types
 import comtypes
-
+import array
 acad = Autocad(create_if_not_exists=True)
-acad.ActiveDocument.Application.Documents.Open("D:\\IT\\Bridge_truss\\pattern.dwg")
+# acad.ActiveDocument.Application.Documents.Open("D:\\IT\\Bridge_truss\\pattern.dwg")
 acad.prompt("Hello, Autocad from Python\n")
 print(acad.doc.Name)
 
 
-def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i):
-    """ This function draws the
-    I-beam element in Autocad
+def dim_aligned(point1, point2, scale, indent_x=0, indent_y=0, start_point_x=0, start_point_y=0, move_x=0, move_y=0):
+
+    """ This function places an aligned dimension.
+        Parameters:
+        1. point1, point2 - points in between you want to place a dimension.
+        2. scale - an input_parameter element function.
+        3. indent_x, indent_y - indents in accordance with GOST:
+          - 10 mm for first step;
+          - 8 mm for other steps.
+          For 2-nd line of dimensions indent = 10+8, for 3-rd -10+8+8, etc.
+
+          !!! BE CAREFUL !!! with "+" and "-" !!!
+
+        4. start_point_x, start_point_y  - x and y-coordinates from which you need to make an indent.
+        5. move_x, move_y - view's offset.
     """
-    # Creating front view
-    p1 = types.aDouble(0, 0)
-    p2 = types.aDouble(l_i, 0)
-    p3 = types.aDouble(l_i, (tw2_i + h_i + tw1_i))
-    p4 = types.aDouble(0, (tw2_i + h_i + tw1_i))
-    p5 = types.aDouble(0, tw2_i)
-    p6 = types.aDouble(l_i, tw2_i)
-    p7 = types.aDouble(0, tw2_i + h_i)
-    p8 = types.aDouble(l_i, tw2_i + h_i)
-    poly_f_1 = acad.model.AddLightweightPolyline(p1 + p2 + p3 + p4 + p1)
-    poly_f_2 = acad.model.AddLightweightPolyline(p5 + p6)
-    poly_f_3 = acad.model.AddLightweightPolyline(p7 + p8)
 
+    # It's measured from 0, 0, 0 !!!
+    loc = array.array('d', [start_point_x+indent_x*scale, start_point_y+indent_y*scale, 0])
+    # ==============================
+    dim = acad.model.AddDimAligned(point1, point2, loc)
+    dim.layer = "Размер"
+    if move_x != 0 or move_y != 0:
+        dim.move(APoint(0, 0), APoint(move_x, move_y))
+
+
+def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i):
+
+    """ This function creates the geometry
+        of the I-beam element in Autocad
+    """
+
+    # Creating front view.
+
+    scale_front = int(input("Enter a scale of the front view: "))
+    print("Creating the front view...")
+    p1 = array.array('d', [0, 0, 0])
+    p2 = array.array('d', [l_i, 0, 0])
+    p3 = array.array('d', [l_i, tw2_i, 0])
+    p4 = array.array('d', [0, tw2_i, 0])
+    p5 = array.array('d', [0, tw2_i + h_i, 0])
+    p6 = array.array('d', [l_i, tw2_i + h_i, 0])
+    p7 = array.array('d', [l_i, (tw2_i + h_i + tw1_i), 0])
+    p8 = array.array('d', [0, (tw2_i + h_i + tw1_i), 0])
+    poly_f_b1 = acad.model.AddPolyline(p1 + p2 + p3 + p4 + p1)
+    poly_f_b2 = acad.model.AddPolyline(p5 + p6 + p7 + p8 + p5)
+    poly_f_h1 = acad.model.AddPolyline(p3 + p4 + p5 + p6 + p3)
+    poly_f_b1.layer = "Основная 0.25"
+    poly_f_b2.layer = "Основная 0.25"
+    poly_f_h1.layer = "Основная 0.25"
+    dim_aligned(p1, p2, scale_front, indent_y=-10)
+    dim_aligned(p2, p3, scale_front, indent_x=10, start_point_x=l_i)
     # Creating top view
-    p9 = types.aDouble(0, b2_i)
-    p10 = types.aDouble(l_i, b2_i)
-    p11 = types.aDouble(-100, b2_i/2)
-    p12 = types.aDouble(l_i+100, b2_i/2)
-    poly_t_1 = acad.model.AddLightweightPolyline(p1 + p2 + p10 + p9 + p1)
-    poly_t_2 = acad.model.AddLightweightPolyline(p11 + p12)
 
-   
+    scale_top = int(input("Enter a scale of the top view: "))
+    if scale_front != scale_top:
+        input("Please change a scale in model and press \"Y\": ")
+    print("Creating the top view...")
+    p9 = array.array('d', [0, b2_i, 0])
+    p10 = array.array('d', [l_i, b2_i, 0])
+    p11 = array.array('d', [-100, b2_i/2, 0])
+    p12 = array.array('d', [l_i+100, b2_i/2, 0])
+
+    poly_t_1 = acad.model.AddPolyline(p1 + p2 + p10 + p9 + p1)
+    poly_t_2 = acad.model.AddPolyline(p11 + p12)
+
+    poly_t_1.layer = "Основная 0.25"
+    poly_t_2.layer = "Ось"
+
+    poly_t_1.move(APoint(0, 0), APoint(0, -5000))
+    poly_t_2.move(APoint(0, 0), APoint(0, -5000))
+
+    dim_aligned(p1, p2, scale_top, indent_y=-10, move_y=-5000)
+
 
 elements = []
 type_elem_1 = elements.append("I-beam")
@@ -43,16 +91,15 @@ for i, j in zip(range(1, len(elements) + 1), elements):
 
 choice = input("Choose the element or press any key to exit: ")
 if choice == str(1):
-    print("You chose I-beam element. Let's set parameters (in millimetres): ")
+    print("You chose the I-beam element. Let's set parameters (in millimetres): ")
 
-    l_i = int(input("Enter length: "))
-    b1_i = int(input("Enter the width of the top chord: "))
-    tw1_i = int(input("Enter the thickness of the top chord: "))
-    b2_i = int(input("Enter the width of the bottom chord: "))
-    tw2_i = int(input("Enter the thickness of the bottom chord: "))
-    h_i = int(input("Enter the height of the wall: "))
-    t_i = int(input("Enter the thickness of the wall: "))
-
+    l_i = int(input("Enter a length of an element: "))
+    b1_i = int(input("Enter a width of a top chord: "))
+    tw1_i = int(input("Enter a thickness of a top chord: "))
+    b2_i = int(input("Enter a width of a bottom chord: "))
+    tw2_i = int(input("Enter a thickness of a bottom chord: "))
+    h_i = int(input("Enter a height of a wall: "))
+    t_i = int(input("Enter a thickness of a wall: "))
     i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i)
 elif choice == str(2):
     T_beam()
