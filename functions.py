@@ -3,14 +3,20 @@ import comtypes
 import array
 import openpyxl
 
-wb = openpyxl.load_workbook("D:\\IT\\Bridge_truss\\settings.xlsx", data_only=True)
-sheet = wb["Sheet"]
 
 acad = Autocad(create_if_not_exists=True)
-# acad.Application.Documents.Open("D:\\IT\\Bridge_truss\\pattern.dwg")
+acad.Application.Documents.Open("D:\\IT\\Bridge_truss\\pattern.dwg")
 acad.prompt("Hello, Autocad from Python\n")
 print(acad.doc.Name)
 
+
+def choose_element():
+    elements = []
+    type_elem_1 = elements.append("I-beam")
+    type_elem_2 = elements.append("T-beam")
+    type_elem_3 = elements.append("The \"Box\"")
+    for i, j in zip(range(1, len(elements) + 1), elements):
+        print(i, ". ", j, sep='')
 
 def dim_aligned(point1, point2, scale, indent_x=0, indent_y=0, start_point_x=0, start_point_y=0, move_x=0, move_y=0):
     """ This function places an aligned dimension.
@@ -46,7 +52,7 @@ def holes(diameter: str, start_point_x, start_point_y, holes_grid, move_x=0, mov
             block.move(APoint(0, 0), APoint(move_x, move_y))
 
 
-def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, rows_l, col_l, rows_c, col_c, rows_r, col_r):
+def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, sheet_name):
     """ This function creates the geometry
         of the I-beam element in Autocad
     """
@@ -94,8 +100,8 @@ def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, rows_l, col_l, rows_c, col_c
     poly_t_2.move(APoint(0, 0), APoint(0, offset_view_y))
 
     holes_grid_l = []
-    for i in range(7, 7+col_l):
-        for j in range(2, rows_l*2+2):
+    for i in range(7, 11):
+        for j in range(2, 14):
             holes_grid_l.append(sheet.cell(row=i, column=j).value)
 
 
