@@ -20,9 +20,14 @@ if choice == str(1):
     t_i = int(input("Enter a thickness of a wall: "))
     print("it's time to assign a grid of bolt holes.")
 
-    rows = int(input("Enter a number of rows: "))
-    col = int(input("Enter a number of columns: "))
-    i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, rows, col)
+    rows_l = int(input("Enter a number of rows on the left edge of the element: "))
+    col_l = int(input("Enter a number of columns on the left edge of the element: "))
+    rows_c = int(input("Enter a number of rows on the left edge of the element: "))
+    col_c = int(input("Enter a number of columns on the left edge of the element: "))
+    rows_r = int(input("Enter a number of rows on the left edge of the element: "))
+    col_r = int(input("Enter a number of columns on the left edge of the element: "))
+
+    i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, rows_l, col_l, rows_c, col_c, rows_r, col_r)
 
 elif choice == str(2):
     T_beam()

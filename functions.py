@@ -46,7 +46,7 @@ def holes(diameter: str, start_point_x, start_point_y, holes_grid, move_x=0, mov
             block.move(APoint(0, 0), APoint(move_x, move_y))
 
 
-def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, rows, col):
+def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, rows_l, col_l, rows_c, col_c, rows_r, col_r):
     """ This function creates the geometry
         of the I-beam element in Autocad
     """
@@ -93,15 +93,14 @@ def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, rows, col):
     poly_t_1.move(APoint(0, 0), APoint(0, offset_view_y))
     poly_t_2.move(APoint(0, 0), APoint(0, offset_view_y))
 
-    holes_grid_1 = []
-    for i in range(7, 7+col):
-        for j in range(2, rows*2+2):
-            holes_grid_1.append(sheet.cell(row=i, column=j).value)
-    # holes_grid2 = ((50,	130), (130,	130), (210,	370), (290,	290))
-    # holes_grid3 = ((50, 290), (130, 290))
-    # holes_grid4 = ((50, 370), (130, 370))
-    holes("25", 0, 0, holes_grid_1, move_y=offset_view_y)
-    # holes("25", 0, 0, holes_grid2, move_y=offset_view_y)
+    holes_grid_l = []
+    for i in range(7, 7+col_l):
+        for j in range(2, rows_l*2+2):
+            holes_grid_l.append(sheet.cell(row=i, column=j).value)
+
+
+    holes("25", 0, 0, holes_grid_l, move_y=offset_view_y)
+    # holes("25", 0, 0, holes_grid_3, move_y=offset_view_y)
     # holes("25", 0, 0, holes_grid3, move_y=offset_view_y)
     # holes("25", 0, 0, holes_grid4, move_y=offset_view_y)
     dim_aligned(p1, p2, scale_top, indent_y=-10, move_y=offset_view_y)
