@@ -18,7 +18,12 @@ if choice == str(1):
     tw2_i = int(input("Enter a thickness of a bottom chord: "))
     h_i = int(input("Enter a height of a wall: "))
     t_i = int(input("Enter a thickness of a wall: "))
-    i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i)
+    print("it's time to assign a grid of bolt holes.")
+
+    rows = int(input("Enter a number of rows: "))
+    col = int(input("Enter a number of columns: "))
+    i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, rows, col)
+
 elif choice == str(2):
     T_beam()
 elif choice == str(3):

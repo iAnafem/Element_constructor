@@ -1,15 +1,18 @@
 from pyautocad import Autocad, APoint, types
 import comtypes
 import array
+import openpyxl
+
+wb = openpyxl.load_workbook("D:\\IT\\Bridge_truss\\settings.xlsx", data_only=True)
+sheet = wb["Sheet"]
 
 acad = Autocad(create_if_not_exists=True)
-acad.ActiveDocument.Application.Documents.Open("D:\\IT\\Bridge_truss\\pattern.dwg")
+# acad.Application.Documents.Open("D:\\IT\\Bridge_truss\\pattern.dwg")
 acad.prompt("Hello, Autocad from Python\n")
 print(acad.doc.Name)
 
 
 def dim_aligned(point1, point2, scale, indent_x=0, indent_y=0, start_point_x=0, start_point_y=0, move_x=0, move_y=0):
-
     """ This function places an aligned dimension.
         Parameters:
         1. point1, point2 - the points between which you want to place a dimension.
@@ -25,7 +28,7 @@ def dim_aligned(point1, point2, scale, indent_x=0, indent_y=0, start_point_x=0, 
         5. move_x, move_y - view's offset.
     """
     # It's measured from 0, 0, 0 !!!
-    loc = array.array('d', [start_point_x+indent_x*scale, start_point_y+indent_y*scale, 0])
+    loc = array.array('d', [start_point_x + indent_x * scale, start_point_y + indent_y * scale, 0])
     # ==============================
     dim = acad.model.AddDimAligned(point1, point2, loc)
     dim.layer = "Размер"
@@ -33,7 +36,17 @@ def dim_aligned(point1, point2, scale, indent_x=0, indent_y=0, start_point_x=0, 
         dim.move(APoint(0, 0), APoint(move_x, move_y))
 
 
-def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i):
+def holes(diameter: str, start_point_x, start_point_y, holes_grid, move_x=0, move_y=0):
+
+    for x in range(0, len(holes_grid), 2):
+        if holes_grid[x] != 0:
+            block = acad.model.InsertBlock(APoint(start_point_x + holes_grid[x],
+                                                  start_point_y + holes_grid[x+1]),
+                                           "hole_" + diameter, 1, 1, 1, 0)
+            block.move(APoint(0, 0), APoint(move_x, move_y))
+
+
+def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, rows, col):
     """ This function creates the geometry
         of the I-beam element in Autocad
     """
@@ -64,6 +77,7 @@ def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i):
     scale_top = int(input("Enter a scale of the top view: "))
     if scale_front != scale_top:
         input("Please change a scale in model and press \"Y\": ")
+    offset_view_y = -5000
     print("Creating the top view...")
     p9 = array.array('d', [0, b2_i, 0])
     p10 = array.array('d', [l_i, b2_i, 0])
@@ -76,9 +90,19 @@ def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i):
     poly_t_1.layer = "Основная 0.25"
     poly_t_2.layer = "Ось"
 
-    poly_t_1.move(APoint(0, 0), APoint(0, -5000))
-    poly_t_2.move(APoint(0, 0), APoint(0, -5000))
+    poly_t_1.move(APoint(0, 0), APoint(0, offset_view_y))
+    poly_t_2.move(APoint(0, 0), APoint(0, offset_view_y))
 
-    dim_aligned(p1, p2, scale_top, indent_y=-10, move_y=-5000)
-
+    holes_grid_1 = []
+    for i in range(7, 7+col):
+        for j in range(2, rows*2+2):
+            holes_grid_1.append(sheet.cell(row=i, column=j).value)
+    # holes_grid2 = ((50,	130), (130,	130), (210,	370), (290,	290))
+    # holes_grid3 = ((50, 290), (130, 290))
+    # holes_grid4 = ((50, 370), (130, 370))
+    holes("25", 0, 0, holes_grid_1, move_y=offset_view_y)
+    # holes("25", 0, 0, holes_grid2, move_y=offset_view_y)
+    # holes("25", 0, 0, holes_grid3, move_y=offset_view_y)
+    # holes("25", 0, 0, holes_grid4, move_y=offset_view_y)
+    dim_aligned(p1, p2, scale_top, indent_y=-10, move_y=offset_view_y)
 # acad.ActiveDocument.SaveAs('D:\\IT\\Bridge_truss\\1.dwg')
