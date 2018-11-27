@@ -51,18 +51,18 @@ def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, sheet):
 
     # Creating front view.
 
-    scale_front = int(input("Enter a scale of the front view: "))
+    scale_front = int(input("Enter a scale of front view: "))
 
-    print("Creating the front view...")
+    print("Creating of front view...")
 
     p1 = array.array('d', [0, 0, 0])
     p2 = array.array('d', [l_i, 0, 0])
     p3 = array.array('d', [l_i, tw2_i, 0])
     p4 = array.array('d', [0, tw2_i, 0])
-    p5 = array.array('d', [0, tw2_i + h_i, 0])
-    p6 = array.array('d', [l_i, tw2_i + h_i, 0])
-    p7 = array.array('d', [l_i, (tw2_i + h_i + tw1_i), 0])
-    p8 = array.array('d', [0, (tw2_i + h_i + tw1_i), 0])
+    p5 = array.array('d', [0, h_i - tw1_i, 0])
+    p6 = array.array('d', [l_i, h_i - tw1_i, 0])
+    p7 = array.array('d', [l_i, h_i, 0])
+    p8 = array.array('d', [0, h_i, 0])
     poly_f_b1 = acad.model.AddPolyline(p1 + p2 + p3 + p4 + p1)
     poly_f_b2 = acad.model.AddPolyline(p5 + p6 + p7 + p8 + p5)
     poly_f_h1 = acad.model.AddPolyline(p3 + p4 + p5 + p6 + p3)
@@ -79,7 +79,7 @@ def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, sheet):
         input("Please change a scale in model and press \"Y\": ")
     offset_view_y = -5000
 
-    print("Creating the top view...")
+    print("Creating of top view...")
 
     p9 = array.array('d', [0, b2_i, 0])
     p10 = array.array('d', [l_i, b2_i, 0])
@@ -95,19 +95,48 @@ def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, sheet):
     poly_t_1.move(APoint(0, 0), APoint(0, offset_view_y))
     poly_t_2.move(APoint(0, 0), APoint(0, offset_view_y))
 
+    print("Creating of bolt holes grid ...")
+
+    # Making holes grid for chords:
+
+    # Left grid
+
     holes_left = []
     for i in range(18, 24):
         for j in range(2, 16):
             if sheet.cell(row=i, column=j).value is not None:
                 holes_left.append(sheet.cell(row=i, column=j).value)
+
+    # Right grid
+
     holes_right = [0] * len(holes_left)
     for i in range(0, len(holes_left), 2):
         holes_right[i] = -holes_left[i]
     for i in range(1, len(holes_left), 2):
         holes_right[i] = holes_left[i]
 
+    # Making holes grid for wall
+
+    # Left grid
+
+    holes_wall_left = []
+    for i in range(60, 66):
+        for j in range(2, 16):
+            if sheet.cell(row=i, column=j).value is not None:
+                holes_wall_left.append(sheet.cell(row=i, column=j).value)
+
+    # Right grid
+
+    holes_wall_right = [0] * len(holes_wall_left)
+    for i in range(0, len(holes_wall_left), 2):
+        holes_wall_right[i] = -holes_wall_left[i]
+    for i in range(1, len(holes_wall_left), 2):
+        holes_wall_right[i] = holes_wall_left[i]
+
     holes("25", 0, 0, holes_left, move_y=offset_view_y)
     holes("25", l_i, 0, holes_right, move_y=offset_view_y)
+    holes("25", 0, tw2_i, holes_wall_left)
+    holes("25", l_i, tw2_i, holes_wall_right)
     # holes("25", 0, 0, holes_grid3, move_y=offset_view_y)
     # holes("25", 0, 0, holes_grid4, move_y=offset_view_y)
     dim_aligned(p1, p2, scale_top, indent_y=-10, move_y=offset_view_y)
