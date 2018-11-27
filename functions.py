@@ -10,14 +10,6 @@ acad.prompt("Hello, Autocad from Python\n")
 print(acad.doc.Name)
 
 
-def choose_element():
-    elements = []
-    type_elem_1 = elements.append("I-beam")
-    type_elem_2 = elements.append("T-beam")
-    type_elem_3 = elements.append("The \"Box\"")
-    for i, j in zip(range(1, len(elements) + 1), elements):
-        print(i, ". ", j, sep='')
-
 def dim_aligned(point1, point2, scale, indent_x=0, indent_y=0, start_point_x=0, start_point_y=0, move_x=0, move_y=0):
     """ This function places an aligned dimension.
         Parameters:
@@ -52,7 +44,7 @@ def holes(diameter: str, start_point_x, start_point_y, holes_grid, move_x=0, mov
             block.move(APoint(0, 0), APoint(move_x, move_y))
 
 
-def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, sheet_name):
+def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, sheet):
     """ This function creates the geometry
         of the I-beam element in Autocad
     """
@@ -60,7 +52,9 @@ def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, sheet_name):
     # Creating front view.
 
     scale_front = int(input("Enter a scale of the front view: "))
+
     print("Creating the front view...")
+
     p1 = array.array('d', [0, 0, 0])
     p2 = array.array('d', [l_i, 0, 0])
     p3 = array.array('d', [l_i, tw2_i, 0])
@@ -84,7 +78,9 @@ def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, sheet_name):
     if scale_front != scale_top:
         input("Please change a scale in model and press \"Y\": ")
     offset_view_y = -5000
+
     print("Creating the top view...")
+
     p9 = array.array('d', [0, b2_i, 0])
     p10 = array.array('d', [l_i, b2_i, 0])
     p11 = array.array('d', [-100, b2_i / 2, 0])
@@ -99,14 +95,19 @@ def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, sheet_name):
     poly_t_1.move(APoint(0, 0), APoint(0, offset_view_y))
     poly_t_2.move(APoint(0, 0), APoint(0, offset_view_y))
 
-    holes_grid_l = []
-    for i in range(7, 11):
-        for j in range(2, 14):
-            holes_grid_l.append(sheet.cell(row=i, column=j).value)
+    holes_left = []
+    for i in range(18, 24):
+        for j in range(2, 16):
+            if sheet.cell(row=i, column=j).value is not None:
+                holes_left.append(sheet.cell(row=i, column=j).value)
+    holes_right = [0] * len(holes_left)
+    for i in range(0, len(holes_left), 2):
+        holes_right[i] = -holes_left[i]
+    for i in range(1, len(holes_left), 2):
+        holes_right[i] = holes_left[i]
 
-
-    holes("25", 0, 0, holes_grid_l, move_y=offset_view_y)
-    # holes("25", 0, 0, holes_grid_3, move_y=offset_view_y)
+    holes("25", 0, 0, holes_left, move_y=offset_view_y)
+    holes("25", l_i, 0, holes_right, move_y=offset_view_y)
     # holes("25", 0, 0, holes_grid3, move_y=offset_view_y)
     # holes("25", 0, 0, holes_grid4, move_y=offset_view_y)
     dim_aligned(p1, p2, scale_top, indent_y=-10, move_y=offset_view_y)
