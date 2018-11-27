@@ -10,7 +10,7 @@ acad.prompt("Hello, Autocad from Python\n")
 print(acad.doc.Name)
 
 
-def dim_aligned(point1, point2, scale, indent_x=0, indent_y=0, start_point_x=0, start_point_y=0, move_x=0, move_y=0):
+def dim_rotated(point1, point2, scale, indent_x=0, indent_y=0, start_point_x=0, start_point_y=0, move_x=0, move_y=0):
     """ This function places an aligned dimension.
         Parameters:
         1. point1, point2 - the points between which you want to place a dimension.
@@ -28,7 +28,7 @@ def dim_aligned(point1, point2, scale, indent_x=0, indent_y=0, start_point_x=0, 
     # It's measured from 0, 0, 0 !!!
     loc = array.array('d', [start_point_x + indent_x * scale, start_point_y + indent_y * scale, 0])
     # ==============================
-    dim = acad.model.AddDimAligned(point1, point2, loc)
+    dim = acad.model.AddDimRotated(point1, point2, loc, 0)
     dim.layer = "Размер"
     if move_x != 0 or move_y != 0:
         dim.move(APoint(0, 0), APoint(move_x, move_y))
@@ -68,8 +68,8 @@ def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, sheet):
     poly_f_b1.layer = "Основная 0.25"
     poly_f_b2.layer = "Основная 0.25"
     poly_f_h1.layer = "Основная 0.25"
-    dim_aligned(p1, p2, scale_front, indent_y=-10)
-    dim_aligned(p2, p3, scale_front, indent_x=10, start_point_x=l_i)
+    dim_rotated(p1, p2, scale_front, indent_y=-10)
+    dim_rotated(p2, p3, scale_front, indent_x=10, start_point_x=l_i)
 
     # Creating top view
 
@@ -159,7 +159,7 @@ def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, sheet):
     holes(diameter, start_point_x, 0, holes_mid, move_y=offset_view_y)
     # holes("25", 0, 0, holes_grid3, move_y=offset_view_y)
     # holes("25", 0, 0, holes_grid4, move_y=offset_view_y)
-    dim_aligned(p1, p2, scale_top, indent_y=-10, move_y=offset_view_y)
+    dim_rotated(p1, p2, scale_top, indent_y=-10, move_y=offset_view_y)
 
     # Bolt holes side view
 
@@ -184,7 +184,7 @@ def i_beam(l_i, b1_i, tw1_i, b2_i, tw2_i, h_i, t_i, sheet):
             hole_line1.copy().move(APoint(0, 0), APoint(0, h_i - tw1_i))
             hole_line2.copy().move(APoint(0, 0), APoint(0, h_i - tw1_i))
         p_x2 = array.array('d', [h_s_x[i+1], 0, 0])
-        dim_aligned(p_x1, p_x2, scale_front, indent_y=-10, move_y=offset_view_y)
+        dim_rotated(p_x1, p_x2, scale_front, indent_y=-10, move_y=offset_view_y)
 
     h_s_s = []
     # holes_side side view
