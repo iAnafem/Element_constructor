@@ -1,6 +1,6 @@
 import openpyxl
 import array
-from pyautocad import Autocad, APoint
+from pyautocad import Autocad, APoint, ACAD
 
 
 class Point:
@@ -11,7 +11,7 @@ class Point:
         self.z = coord[2]
 
     def offset(self, offset_x, offset_y):
-        return array.array('d', [self.x + offset_x, self.y + offset_y, self.z])
+        return Point([self.x + offset_x, self.y + offset_y, self.z])
 
 
 class Row:
@@ -79,6 +79,34 @@ class Constructor:
             for j in range(len(group.rows[i].points)):
                 self.app.model.InsertBlock(group.get_point(i, j).center, block_name, 1, 1, 1, 0)
 
+    def add_block(self, point, block_name, scale):
+        self.app.model.InsertBlock(point.center, block_name, scale, scale, scale, 0)
+
+    def add_double_gap(self, point, scale):
+        self.add_block(point.offset(0, - point.y/2), 'gap', scale)
+        self.add_line(point.offset(- 1.5 * scale, - point.y / 2 - scale).center,
+                      point.offset(- 1.5 * scale, -point.y - scale).center, "разрыв")
+        self.add_line(point.offset(- 1.5 * scale,  - point.y/2 + scale).center,
+                      point.offset(- 1.5 * scale, scale).center, "разрыв")
+        self.add_line(point.offset(1.5 * scale, - point.y / 2 + scale).center,
+                      point.offset(1.5 * scale, scale).center, "разрыв")
+        self.add_line(point.offset(1.5 * scale, - point.y / 2 - scale).center,
+                      point.offset(1.5 * scale, -point.y - scale).center, "разрыв")
+        self.app.ActiveDocument.SendCommand("_trim\n\nF\n" + str(point.x) + "," +
+                                            str(- point.y - 1) + "\n" +
+                                            str(point.x) + "," +
+                                            str(point.y + 1) + "\n\n\n")
+
+    def holes_side_view(self, group1, group2):
+        for i in range(len(group1.rows)):
+            coord = group1.get_point(i, 0).x
+            self.add_line(group2.get_point(0, 0).offset(coord, 0).center,
+                          group2.get_point(0, 1).offset(coord, 0).center, 'Пунктир')
+            self.add_line(group2.get_point(0, 2).offset(coord, 0).center,
+                          group2.get_point(0, 3).offset(coord, 0).center, 'Пунктир')
+            self.add_line(group2.get_point(2, 0).offset(coord, 0).center,
+                          group2.get_point(2, 1).offset(coord, 0).center, 'Ось')
+
 
 class Editor:
     def __init__(self, app):
@@ -92,16 +120,29 @@ class Editor:
                "=" + str(group.get_point(p2[0], p2[1]).y - group.get_point(p1[0], p1[1]).y)
 
     def move_front_view(self):
-        self.app.ActiveDocument.SendCommand("ПЕРЕНЕСТИ\n10000,-2000\n-1000,2000\n\n0,0\n-12000,0\n")
+        self.app.ActiveDocument.SendCommand("m\n25000,-2000\n-1000,2000\n\n0,0\n-12000,0\n")
 
     def move_top_view(self):
-        self.app.ActiveDocument.SendCommand("ПЕРЕНЕСТИ\n10000,-2000\n-1000,2000\n\n0,0\n-12000,-5000\n")
+        self.app.ActiveDocument.SendCommand("m\n25000,-2000\n-1000,2000\n\n0,0\n-12000,-5000\n")
 
     def move_side_view(self):
-        self.app.ActiveDocument.SendCommand("ПЕРЕНЕСТИ\n10000,-2000\n-1000,2000\n\n0,0\n5000,0\n")
+        self.app.ActiveDocument.SendCommand("m\n10000,-2000\n-1000,2000\n\n0,0\n5000,0\n")
 
     def change_scale(self, scale):
         return self.app.ActiveDocument.SendCommand("CANNOSCALE\n1:" + str(scale) + "\n")
+
+    def squeeze_left(self, point_1, point_2):
+        self.app.ActiveDocument.SendCommand("_stretch\n" + str(point_1.x + 2500) + ",-2000\n" +
+                                            str(point_1.x - 2500) + ",2000\n\n0,0\n" +
+                                            str((point_2.x - 4500)/2) + ",0\n")
+
+    def squeeze_right(self, point_1, point_2):
+        self.app.ActiveDocument.SendCommand("_stretch\n" + str(point_1.x + 2500) + ",-2000\n" +
+                                            str(point_1.x - 2500) + ",2000\n\n0,0\n" +
+                                            str(-(point_2.x - 4500)/2) + ",0\n")
+
+    def original_element(self, offset):
+        self.app.ActiveDocument.SendCommand("c\n25000,-2000\n-1000,2000\n\n0,0\n0," + str(offset) + "\n\n")
 
 
 class Dimensions:
@@ -116,8 +157,8 @@ class Dimensions:
 
     def chain_rotated_dim_x(self, group, start_point, offset, indent, scale):
         for i in range(len(group.rows) - 1):
-            Dimensions(self.app).rotated_dim_x(group.get_point(i, 0).offset(0, offset),
-                                               group.get_point(i + 1, 0).offset(0, offset),
+            Dimensions(self.app).rotated_dim_x(group.get_point(i, 0).offset(0, offset).center,
+                                               group.get_point(i + 1, 0).offset(0, offset).center,
                                                start_point, indent, scale)
 
     def rotated_dim_y(self, point1, point2, start_point, indent, scale):
@@ -128,8 +169,8 @@ class Dimensions:
 
     def chain_rotated_dim_y(self, group, start_point, offset, indent, scale):
         for i in range(group.row_len(0) - 1):
-            Dimensions(self.app).rotated_dim_y(group.get_point(0, i).offset(offset, 0),
-                                               group.get_point(0, i + 1).offset(offset, 0),
+            Dimensions(self.app).rotated_dim_y(group.get_point(0, i).offset(offset, 0).center,
+                                               group.get_point(0, i + 1).offset(offset, 0).center,
                                                start_point, indent, scale)
 
 
@@ -143,17 +184,25 @@ class Design:
                                              + str(self.worksheet["C2"].value) + "a "
                                              + str(self.worksheet["D2"].value)
                                              + " (1:" + str(scale) + ")",
-                                             APoint(group.get_point(0, 1).x / 2 - 700,
-                                                    group.get_point(1, 2).y + 600),
-                                             4 * scale)
+                                             APoint(0, 0), 4 * scale)
+        main_header.Alignment = ACAD.acAlignmentMiddleCenter
+        main_header.TextAlignmentPoint = APoint(group.get_point(0, 1).x / 2,
+                                                group.get_point(1, 2).y + 30 * scale)
         main_header.layer = "Текст заголовков"
         return main_header
 
-    def header(self, text, group, scale):
-        header = self.app.model.AddText(text,
-                                        APoint(group.get_point(0, 1).x / 2 - 180,
-                                               group.get_point(1, 2).y + 500),
-                                        4 * scale)
+    def top_header(self, text, group, scale):
+        header = self.app.model.AddText(text, APoint(0, 0), 4 * scale)
+        header.Alignment = ACAD.acAlignmentMiddleCenter
+        header.TextAlignmentPoint = APoint(group.get_point(0, 1).x / 2,
+                                           group.get_point(1, 2).y + 25 * scale)
+        header.layer = "Текст заголовков"
+        return header
+
+    def side_header(self, text, group, scale):
+        header = self.app.model.AddText(text, APoint(0, 0), 4 * scale)
+        header.Alignment = ACAD.acAlignmentMiddleCenter
+        header.TextAlignmentPoint = APoint(0, group.get_point(1, 2).y + 25 * scale)
         header.layer = "Текст заголовков"
         return header
 
@@ -209,6 +258,15 @@ class Tables:
                 table.MergeCells(2, i - 1, 7, 7)
                 break
 
+    def add_stamp(self):
+        self.app.ActiveDocument.SendCommand('LAYOUT\nS\nГотовое\n')
+        table = self.app.find_one(object_name_or_list="table")
+        table.SetText(8, 6, str(self.worksheet["U58"].value))
+        table.SetText(6, 8, str(self.worksheet["W55"].value))
+        text = self.app.doc.PaperSpace.AddText(self.worksheet["W52"].value, APoint(0, 0), 2.5)
+        text.Alignment = ACAD.acAlignmentMiddleCenter
+        text.TextAlignmentPoint = APoint(520, 229.50)
+
 
 def get_coordinates(point_group, range_, worksheet):
     for i in range(range_[0], range_[1] + 1):
@@ -238,3 +296,12 @@ def get_autocad(path):
 def get_excel(path):
     wb = openpyxl.load_workbook(path, data_only=True)
     return wb
+
+
+def autocad_save(app, path, worksheet):
+    app.ActiveDocument.SaveAs(path +
+                              "_" +
+                              str(worksheet["W52"].value) +
+                              "_" +
+                              str(worksheet["U58"].value)
+                              )
