@@ -17,6 +17,7 @@ def create_front_view(app, worksheet, scale, holes_offset, g):
     constr.holes_side_view(g['LCH'], g['HF'])
     constr.holes_side_view(g['MCH'], g['HF'])
     constr.holes_side_view(g['RCH'], g['HF'])
+    edit.original_element("15000,25000")
     # bottom line
     dim = Dimensions(app)
     dim.rotated_dim_x(g['FGP'].get_point(0, 0).center,
@@ -98,7 +99,6 @@ def create_front_view(app, worksheet, scale, holes_offset, g):
                         offset(float(-g['FGP'].get_point(0, 1).x / 2), -15 * scale).center,
                         'view_po_A_b', scale)
 
-    edit.original_element(20000)
     edit.squeeze_left(g['FGP'].get_point(0, 0), g['FGP'].get_point(0, 1))
     edit.squeeze_right(g['FGP'].get_point(0, 1), g['FGP'].get_point(0, 1))
     if g['MCH'].grid_len() > 0:
@@ -108,7 +108,7 @@ def create_front_view(app, worksheet, scale, holes_offset, g):
                                offset(- g["FGP"].get_point(1, 2).x / 2 + 4500/4, 0)), scale)
     else:
         constr.add_double_gap((g["FGP"].get_point(1, 2).offset(- g["FGP"].get_point(1, 2).x / 2, 0)), scale)
-    edit.move_front_view()
+    edit.move_front_view(g['FGP'].get_point(0, 1))
 
 
 def create_top_view(app, worksheet, scale, holes_offset, g):
@@ -125,7 +125,7 @@ def create_top_view(app, worksheet, scale, holes_offset, g):
         constr.add_polyline(g['TGP'], 1, 'Основная 0.25')
     constr.add_polyline(g['TGP'], 2, 'Ось')
     constr.add_polyline(g['TGP'], 3, 'Пунктир')
-
+    edit.original_element("15000,20000")
     dim = Dimensions(app)
     # bottom line
     dim.rotated_dim_x(g['TGP'].get_point(0, 0).center,
@@ -211,7 +211,6 @@ def create_top_view(app, worksheet, scale, holes_offset, g):
     leader = Leader(app, worksheet)
     leader.add_mleader_pos(g['TGP'].get_upper_left().offset(1000, 0).center,
                            g['TGP'].get_upper_left().offset(1000, -17 * scale).center, text_pos2)
-    edit.original_element(15000)
     edit.squeeze_left(g['TGP'].get_point(0, 0), g['TGP'].get_point(0, 1))
     edit.squeeze_right(g['TGP'].get_point(0, 1), g['TGP'].get_point(0, 1))
     if g['MCH'].grid_len() > 0:
@@ -221,7 +220,7 @@ def create_top_view(app, worksheet, scale, holes_offset, g):
                                offset(- g["TGP"].get_point(0, 2).x / 2 + 4500/4, 0)), scale)
     else:
         constr.add_double_gap((g["TGP"].get_point(0, 2).offset(- g["TGP"].get_point(0, 2).x / 2, 0)), scale)
-    edit.move_top_view()
+    edit.move_top_view(g['TGP'].get_point(0, 1))
 
 
 def create_side_view(app, worksheet, scale, g):
@@ -233,7 +232,7 @@ def create_side_view(app, worksheet, scale, g):
     constr.add_polyline(g['SGP'], 1, 'Основная 0.25')
     constr.add_polyline(g['SGP'], 2, 'Ось')
     constr.add_polyline(g['SGP'], 3, 'Основная 0.25')
-
+    edit.original_element("35000,25000")
     dim = Dimensions(app)
     # bottom line
     if g['SGP'].get_point(0, 1).x != g['SGP'].get_point(1, 1).x:
