@@ -18,8 +18,8 @@
           "HS":[19, 20, 3, 14]
           },
   "paths":{
-          "Autocad": "etc\\pattern.dwg",
-          "Excel": "etc\\initial_data.xlsx",
-          "Workpath": "D:\\Объекты\\Водники\\Разработка\\"
+          "Autocad": "..\\etc\\pattern.dwg",
+          "Excel": "..\\etc\\initial_data.xlsx",
+          "Workpath": "\\Чертежи\\"
           }
 }

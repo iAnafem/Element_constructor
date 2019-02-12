@@ -92,7 +92,7 @@ class Constructor:
                       point.offset(1.5 * scale, scale).center, "разрыв")
         self.add_line(point.offset(1.5 * scale, - point.y / 2 - scale).center,
                       point.offset(1.5 * scale, -point.y - scale).center, "разрыв")
-        self.app.ActiveDocument.SendCommand("_trim\n\nF\n" + str(point.x) + "," +
+        self.app.ActiveDocument.SendCommand("_trim\n\nЛ\n" + str(point.x) + "," +
                                             str(- point.y - 1) + "\n" +
                                             str(point.x) + "," +
                                             str(point.y + 1) + "\n\n\n")
@@ -119,11 +119,11 @@ class Editor:
                               group.get_point(p1[0], p1[1]).y) / (group.row_len(p1[0]) - 1))) + \
                "=" + str(group.get_point(p2[0], p2[1]).y - group.get_point(p1[0], p1[1]).y)
 
-    def move_front_view(self):
-        self.app.ActiveDocument.SendCommand("m\n25000,-2000\n-1000,2000\n\n0,0\n-12000,0\n")
+    def move_front_view(self, point):
+        self.app.ActiveDocument.SendCommand("m\n25000,-2000\n-1000,2000\n\n" + str(point.x / 2) + ",0\n-8000,0\n")
 
-    def move_top_view(self):
-        self.app.ActiveDocument.SendCommand("m\n25000,-2000\n-1000,2000\n\n0,0\n-12000,-5000\n")
+    def move_top_view(self, point):
+        self.app.ActiveDocument.SendCommand("m\n25000,-2000\n-1000,2000\n\n" + str(point.x / 2) + ",0\n-8000,-5000\n")
 
     def move_side_view(self):
         self.app.ActiveDocument.SendCommand("m\n10000,-2000\n-1000,2000\n\n0,0\n5000,0\n")
@@ -142,7 +142,7 @@ class Editor:
                                             str(-(point_2.x - 4500)/2) + ",0\n")
 
     def original_element(self, offset):
-        self.app.ActiveDocument.SendCommand("c\n25000,-2000\n-1000,2000\n\n0,0\n0," + str(offset) + "\n\n")
+        self.app.ActiveDocument.SendCommand("c\n25000,-2000\n-1000,2000\n\n0,0\n" + str(offset) + "\n\n")
 
 
 class Dimensions:
@@ -237,9 +237,9 @@ class Tables:
 
     def add_specification(self):
         table = self.app.find_one(object_name_or_list="table")
-        table.SetText(0, 0, "Спецификация " + str(self.worksheet["C2"].value) + "a "
+        table.SetText(0, 0, "Спецификация " + str(self.worksheet["C2"].value) + "и "
                       + str(self.worksheet["D2"].value))
-        table.SetText(18, 0, "* - масса дана с учетом 1,5 % на сварные швы")
+        table.SetText(18, 0, "* - масса дана с учетом 2% на сварные швы")
 
         for i in range(32, 40):
             for j in range(18, 22):
@@ -259,7 +259,7 @@ class Tables:
                 break
 
     def add_stamp(self):
-        self.app.ActiveDocument.SendCommand('LAYOUT\nS\nГотовое\n')
+        self.app.ActiveDocument.SendCommand('РЛИСТ\nТ\nГотовое\n')
         table = self.app.find_one(object_name_or_list="table")
         table.SetText(8, 6, str(self.worksheet["U58"].value))
         table.SetText(6, 8, str(self.worksheet["W55"].value))
