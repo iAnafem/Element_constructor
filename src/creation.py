@@ -1,5 +1,5 @@
-from src.drawing_classes import Constructor, Editor
-from src.design_classes import Design, Dimensions, Leader
+from src.classes.drawing_classes import Constructor, Editor
+from src.classes.design_classes import Design, Dimensions, Leader
 from math import ceil, floor
 
 
