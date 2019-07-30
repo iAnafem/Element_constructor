@@ -1,6 +1,6 @@
 import json
 import os
-from src.singleton import *
+from src.singleton import singleton
 
 
 @singleton

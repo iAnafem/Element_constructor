@@ -1,5 +1,6 @@
-from src.classes import *
-from math import *
+from src.drawing_classes import Constructor, Editor
+from src.design_classes import Design, Dimensions, Leader
+from math import ceil, floor
 
 
 def create_front_view(app, worksheet, scale, holes_offset, g):

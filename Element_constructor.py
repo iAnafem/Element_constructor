@@ -1,5 +1,8 @@
 from src.creation import *
 from src.settings import Settings
+from src.application_classes import launch_autocad, launch_excel, get_coordinates, autocad_save
+from src.tables_class import Tables
+from src.points_classes import Grid
 
 
 print("""Welcome to the \"Element_constructor\" module !!!`
@@ -9,9 +12,9 @@ Good luck!
 
 settings = Settings()
 
-for _sheet in ['C-1', 'C-2', 'C-3', 'C-4']:
-    acad = get_autocad(settings.autocad)
-    sheet = get_excel(settings.excel)[_sheet]
+for _sheet in ['C-4']:
+    acad = launch_autocad(settings.autocad)
+    sheet = launch_excel(settings.excel)[_sheet]
 
     points = {name: Grid() for name in settings.groups}
 
