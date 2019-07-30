@@ -1,6 +1,6 @@
 import openpyxl
 from pyautocad import Autocad
-from src.points_classes import Row
+from src.classes.points_classes import Row
 
 
 def get_coordinates(point_group, range_, worksheet):

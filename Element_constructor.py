@@ -1,8 +1,8 @@
 from src.creation import *
 from src.settings import Settings
-from src.application_classes import launch_autocad, launch_excel, get_coordinates, autocad_save
-from src.tables_class import Tables
-from src.points_classes import Grid
+from src.classes.application_classes import launch_autocad, launch_excel, get_coordinates, autocad_save
+from src.classes.tables_class import Tables
+from src.classes.points_classes import Grid
 
 
 print("""Welcome to the \"Element_constructor\" module !!!`
